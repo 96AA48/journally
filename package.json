@@ -6,6 +6,9 @@
   "scripts": {
     "test": "node test.js"
   },
+  "bin": {
+    "journally": "index.js"
+  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/96aa48/journally.git"
@@ -22,5 +25,8 @@
   "bugs": {
     "url": "https://github.com/96aa48/journally/issues"
   },
-  "homepage": "https://github.com/96aa48/journally#readme"
+  "homepage": "https://github.com/96aa48/journally#readme",
+  "dependencies": {
+    "chalk": "^1.1.3"
+  }
 }
