@@ -1,0 +1,27 @@
+{
+	"__CURSOR" : "s=b2faf8a3a8d847ccaccfea6cd7aa6c6a;i=4776ed;b=3768255434644c948fb0ae5df5758d5e;m=abecef50;t=537820bbba2c4;x=5c4b12588c925853",
+	"__REALTIME_TIMESTAMP" : "1468406565675716", //Timestamp that will be converted by journally.
+	"__MONOTONIC_TIMESTAMP" : "2884431696",
+	"_BOOT_ID" : "3768255434644c948fb0ae5df5758d5e",
+	"_TRANSPORT" : "syslog",
+	"PRIORITY" : "6",
+	"SYSLOG_FACILITY" : "3",
+	"SYSLOG_IDENTIFIER" : "progumidentifier",
+	"_UID" : "1000",
+	"_GID" : "190",
+	"_COMM" : "progrum",
+	"_EXE" : "/usr/bin/progrum",
+	"_CMDLINE" : "progrum",
+	"_CAP_EFFECTIVE" : "0",
+	"_SYSTEMD_CGROUP" : "/user.slice/user-1000.slice/session-c1.scope",
+	"_SYSTEMD_SESSION" : "c1",
+	"_SYSTEMD_OWNER_UID" : "1000",
+	"_SYSTEMD_UNIT" : "session-c1.scope",
+	"_SYSTEMD_SLICE" : "user-1000.slice",
+	"_MACHINE_ID" : "12191f961b9a42e2b1e9e6141f8b9892",
+	"_HOSTNAME" : "urhostname",
+	"_PID" : "1058",
+	"SYSLOG_PID" : "1058",
+	"MESSAGE" : "derp derp, imma program",
+	"_SOURCE_REALTIME_TIMESTAMP" : "1468406565675589"
+}
