@@ -1,0 +1,26 @@
+{
+  "name": "journally",
+  "version": "1.0.0",
+  "description": "A journalctl wrapper for nice colors and filters",
+  "main": "index.js",
+  "scripts": {
+    "test": "node test.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/96aa48/journally.git"
+  },
+  "keywords": [
+    "journal-ctl",
+    "systemd",
+    "systemctl",
+    "arch",
+    "journal"
+  ],
+  "author": "Bram van der Veen",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/96aa48/journally/issues"
+  },
+  "homepage": "https://github.com/96aa48/journally#readme"
+}
