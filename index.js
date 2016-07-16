@@ -1,8 +1,26 @@
 #!/usr/bin/env node
 const spawn = require('child_process').spawn;
-const journalctl = spawn('journalctl', ['-b', '-f', '-o', 'json']);
 const chalk = require('chalk');
 const fs = require('fs');
+
+// prepare the user's arguments to be sent
+// to journalctl
+function prepareUserArguments(args) {
+  let indexOfOutputFlag;
+  const result = Array.from(args);
+
+  if ((indexOfOutputFlag = result.indexOf('-o')) == -1) {
+    // the user didn't enter an output format
+    // enter the flag to use json
+    result.push('-o', 'json');
+  } else {
+    // the user entered an output format,
+    // override it with json
+    result[indexOfOutputFlag + 1] = 'json';
+  }
+
+  return result;
+}
 
 if (!fs.existsSync(process.env.HOME + '/.journallyrc')) {
   fs.writeFileSync(process.env.HOME + '/.journallyrc', JSON.stringify({
@@ -14,6 +32,14 @@ if (!fs.existsSync(process.env.HOME + '/.journallyrc')) {
 }
 
 const settings = JSON.parse(fs.readFileSync(process.env.HOME + '/.journallyrc'));
+
+// if the user provided arguments, pass those to
+// journalctl
+const argvForJournalCtl = (process.argv.length > 2) ?
+  prepareUserArguments(process.argv.slice(2)) :
+  ['-b', '-f', '-o', 'json'];
+
+const journalctl = spawn('journalctl', argvForJournalCtl);
 
 journalctl.stdout.on('data', (data) => {
   let journal = JSON.parse(data.toString().split('\n')[0]);
