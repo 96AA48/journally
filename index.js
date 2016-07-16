@@ -2,6 +2,7 @@
 const spawn = require('child_process').spawn;
 const chalk = require('chalk');
 const fs = require('fs');
+const split2 = require('split2');
 
 // prepare the user's arguments to be sent
 // to journalctl
@@ -41,36 +42,41 @@ const argvForJournalCtl = (process.argv.length > 2) ?
 
 const journalctl = spawn('journalctl', argvForJournalCtl);
 
-journalctl.stdout.on('data', (data) => {
-  let journal = JSON.parse(data.toString().split('\n')[0]);
+journalctl.stdout
+  .pipe(split2())
+  .on('data', (data) => {
+    let journal;
 
-  for (filter of settings.filters) {
-    if (journal.SYSLOG_IDENTIFIER == filter) return;
-  }
+    journal = JSON.parse(data.toString());
 
-  let message = '';
-
-  let matches = settings.output.match(new RegExp('\{(.*?)\}', 'g'));
-
-  for (match of matches) {
-    match = match.replace(/\{|\}/g, '');
-    let property = match.split('.')[0];
-    let color = match.split('.')[1];
-
-    if (property == '__realtime_timestamp') {
-      journal[property.toUpperCase()] = time(journal[property.toUpperCase()]);
+    for (filter of settings.filters) {
+      if (journal.SYSLOG_IDENTIFIER == filter) return;
     }
 
-    if (journal.hasOwnProperty(property.toUpperCase())) {
-        message += chalk[color](journal[property.toUpperCase()].trim()) + ' ';
-    }
-    else {
-      message += chalk[color](property + ' ');
-    }
-  }
+    let message = '';
 
-  console.log(message);
-});
+    let matches = settings.output.match(new RegExp('\{(.*?)\}', 'g'));
+
+    for (match of matches) {
+      match = match.replace(/\{|\}/g, '');
+      let property = match.split('.')[0];
+      let color = match.split('.')[1];
+
+      if (property == '__realtime_timestamp') {
+        journal[property.toUpperCase()] = time(journal[property.toUpperCase()]);
+      }
+
+      let propertyValue = journal[property.toUpperCase()];
+      if (propertyValue) {
+        message += chalk[color](propertyValue.trim()) + ' ';
+      }
+      else {
+        message += chalk[color](property + ' ');
+      }
+    }
+
+    console.log(message);
+  });
 
 function time(timestamp) {
   let date = new Date(parseInt(timestamp) / 1000)
