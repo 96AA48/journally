@@ -41,6 +41,7 @@ const argvForJournalCtl = (process.argv.length > 2) ?
   ['-b', '-f', '-o', 'json'];
 
 const journalctl = spawn('journalctl', argvForJournalCtl);
+const settingsRegEx = new RegExp('\{(.*?)\}', 'g')
 
 journalctl.stdout
   .pipe(split2())
@@ -55,7 +56,7 @@ journalctl.stdout
 
     let message = '';
 
-    let matches = settings.output.match(new RegExp('\{(.*?)\}', 'g'));
+    let matches = settings.output.match(settingsRegEx);
 
     for (match of matches) {
       match = match.replace(/\{|\}/g, '');
