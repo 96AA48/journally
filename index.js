@@ -1,8 +1,27 @@
 #!/usr/bin/env node
 const spawn = require('child_process').spawn;
-const journalctl = spawn('journalctl', ['-b', '-f', '-o', 'json']);
 const chalk = require('chalk');
 const fs = require('fs');
+const split2 = require('split2');
+
+// prepare the user's arguments to be sent
+// to journalctl
+function prepareUserArguments(args) {
+  let indexOfOutputFlag;
+  const result = Array.from(args);
+
+  if ((indexOfOutputFlag = result.indexOf('-o')) == -1) {
+    // the user didn't enter an output format
+    // enter the flag to use json
+    result.push('-o', 'json');
+  } else {
+    // the user entered an output format,
+    // override it with json
+    result[indexOfOutputFlag + 1] = 'json';
+  }
+
+  return result;
+}
 
 if (!fs.existsSync(process.env.HOME + '/.journallyrc')) {
   fs.writeFileSync(process.env.HOME + '/.journallyrc', JSON.stringify({
@@ -15,36 +34,50 @@ if (!fs.existsSync(process.env.HOME + '/.journallyrc')) {
 
 const settings = JSON.parse(fs.readFileSync(process.env.HOME + '/.journallyrc'));
 
-journalctl.stdout.on('data', (data) => {
-  let journal = JSON.parse(data.toString().split('\n')[0]);
+// if the user provided arguments, pass those to
+// journalctl
+const argvForJournalCtl = (process.argv.length > 2) ?
+  prepareUserArguments(process.argv.slice(2)) :
+  ['-b', '-f', '-o', 'json'];
 
-  for (filter of settings.filters) {
-    if (journal.SYSLOG_IDENTIFIER == filter) return;
-  }
+const journalctl = spawn('journalctl', argvForJournalCtl);
+const settingsRegEx = new RegExp('\{(.*?)\}', 'g')
 
-  let message = '';
+journalctl.stdout
+  .pipe(split2())
+  .on('data', (data) => {
+    let journal;
 
-  let matches = settings.output.match(new RegExp('\{(.*?)\}', 'g'));
+    journal = JSON.parse(data.toString());
 
-  for (match of matches) {
-    match = match.replace(/\{|\}/g, '');
-    let property = match.split('.')[0];
-    let color = match.split('.')[1];
-
-    if (property == '__realtime_timestamp') {
-      journal[property.toUpperCase()] = time(journal[property.toUpperCase()]);
+    for (filter of settings.filters) {
+      if (journal.SYSLOG_IDENTIFIER == filter) return;
     }
 
-    if (journal.hasOwnProperty(property.toUpperCase())) {
-        message += chalk[color](journal[property.toUpperCase()].trim()) + ' ';
-    }
-    else {
-      message += chalk[color](property + ' ');
-    }
-  }
+    let message = '';
 
-  console.log(message);
-});
+    let matches = settings.output.match(settingsRegEx);
+
+    for (match of matches) {
+      match = match.replace(/\{|\}/g, '');
+      let property = match.split('.')[0];
+      let color = match.split('.')[1];
+
+      if (property == '__realtime_timestamp') {
+        journal[property.toUpperCase()] = time(journal[property.toUpperCase()]);
+      }
+
+      let propertyValue = journal[property.toUpperCase()];
+      if (propertyValue) {
+        message += chalk[color](propertyValue.trim()) + ' ';
+      }
+      else {
+        message += chalk[color](property + ' ');
+      }
+    }
+
+    console.log(message);
+  });
 
 function time(timestamp) {
   let date = new Date(parseInt(timestamp) / 1000)
