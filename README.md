@@ -13,11 +13,12 @@ npm i journally -g
 ## Usage :
 ```
 Usage:
-  journally
-
+  journally [OPTIONS] [MATCHES]
 ```
 
-journally currently only supports "live" mode where you'll incoming messages from journalctl. Feel free to contribute for more features!
+journally supports all of the flags and arguments from journalctl! (Thanks to [@gerrard00](https://github.com/gerrard00))  
+
+Reference the options in the journalctl [man page](https://www.freedesktop.org/software/systemd/man/journalctl.html) or with `journally --help`.
 
 ## Configuration
 
